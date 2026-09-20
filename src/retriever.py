@@ -2,6 +2,7 @@ import os
 import re
 import glob
 from pathlib import Path
+
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -13,6 +14,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 DB_DIR = BASE_DIR / "chroma_store"
+
 
 def load_transcripts():
     docs = []
@@ -32,16 +34,12 @@ def load_transcripts():
         text = " ".join(lines)
 
         match = re.search(r"Session[ _]*(\d+)", path)
-
-        if match:
-            session = match.group(1)
-        else:
-            session = os.path.basename(path)
+        session = match.group(1) if match else os.path.basename(path)
 
         docs.append(
             Document(
                 page_content=text,
-                metadata={"session": session}
+                metadata={"session": session},
             )
         )
 
@@ -53,23 +51,23 @@ def load_store():
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
-    if os.path.exists(DB_DIR) and os.listdir(DB_DIR):
+    if DB_DIR.exists() and any(DB_DIR.iterdir()):
         return Chroma(
-            persist_directory=DB_DIR,
-            embedding_function=embeddings
+            persist_directory=str(DB_DIR),
+            embedding_function=embeddings,
         )
 
     docs = load_transcripts()
 
     chunks = RecursiveCharacterTextSplitter(
         chunk_size=1000,
-        chunk_overlap=150
+        chunk_overlap=150,
     ).split_documents(docs)
 
     return Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
-        persist_directory=DB_DIR
+        persist_directory=str(DB_DIR),
     )
 
 
@@ -81,13 +79,11 @@ def build_retriever():
 
 if __name__ == "__main__":
     retriever = build_retriever()
+    results = retriever.invoke("what is llm evaluation?")
 
-    results = retriever.invoke(
-        "what is llm evaluation?"
-    )
-
-    for r in results:
+    for result in results:
         print(
-            f"[Session {r.metadata['session']}] "
-            f"{r.page_content[:150]}...\n"
+            f"[Session {result.metadata['session']}] "
+            f"{result.page_content[:150]}...\n"
         )
+
