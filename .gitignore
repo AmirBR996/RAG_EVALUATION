@@ -4,4 +4,6 @@ data
 **.json
 .deepeval
 **__pycache__
-chroma_store
+*chroma_store
+**__pycache__
+**__init__.py
