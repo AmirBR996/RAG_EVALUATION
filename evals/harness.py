@@ -86,4 +86,3 @@ def print_summary(title, summary):
         )
 
     print("=" * 60)
-
