@@ -5,7 +5,7 @@ from langchain_core.output_parsers import StrOutputParser
 
 load_dotenv()
 
-llm = ChatOllama(model="qwen3:8b")
+llm = ChatOllama(model="gemma4:31b-cloud")
 
 prompt = ChatPromptTemplate.from_template(
     """
