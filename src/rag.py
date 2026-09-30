@@ -21,3 +21,12 @@ class RagPipeline:
             "context": context,
             "answer": answer,
         }
+
+
+if __name__ == "__main__":
+    rag = RagPipeline()
+    result = rag.invoke("What is recall and precision")
+    print(f"QUERY = ", result["query"])
+    print(f"answer = ", result["answer"])
+
+
